@@ -1,0 +1,131 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Making authenticated request with supertest | Aung Myo Htet</title>
+
+  
+  <meta name="author" content="Aung Myo Htet">
+  
+
+  
+  <meta name="description" content="aungmyohtet blog">
+  
+
+  
+  
+  <meta name="keywords" content="">
+  
+
+  <meta id="viewport" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <meta property="og:title" content="Making authenticated request with supertest"/>
+
+  <meta property="og:site_name" content="Aung Myo Htet"/>
+
+  
+  <meta property="og:image" content="/favicon.ico"/>
+  
+
+  <link href="/favicon.ico" rel="icon">
+  <link rel="alternate" href="/atom.xml" title="Aung Myo Htet" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+</head>
+
+
+<body>
+<div class="blog">
+  <div class="content">
+
+    <header>
+  <div class="site-branding">
+    <h1 class="site-title">
+      <a href="/">Aung Myo Htet</a>
+    </h1>
+    <p class="site-description"></p>
+  </div>
+  <nav class="site-navigation">
+    <ul>
+      
+        <li><a href="/">Home</a></li>
+      
+        <li><a href="/archives">Archives</a></li>
+      
+    </ul>
+  </nav>
+</header>
+
+    <main class="site-main posts-loop">
+    <article>
+
+  
+    
+    <h3 class="article-title"><span>Making authenticated request with supertest</span></h3>
+    
+  
+
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2018/03/28/making-authenticated-request-with-supertest/" rel="bookmark">
+        <time class="entry-date published" datetime="2018-03-28T13:07:26.356Z">
+          2018-03-28
+        </time>
+      </a>
+    </span>
+  </div>
+
+
+  
+
+  <div class="article-content">
+    <div class="entry">
+      
+        <p>Testing authenticated request with supertest in express application</p>
+<h3 id="Sample-code"><a href="#Sample-code" class="headerlink" title="Sample code"></a>Sample code</h3><p><em>app.js</em><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> createError = <span class="built_in">require</span>(<span class="string">'http-errors'</span>);</span><br><span class="line"><span class="keyword">const</span> express = <span class="built_in">require</span>(<span class="string">'express'</span>);</span><br><span class="line"><span class="keyword">const</span> path = <span class="built_in">require</span>(<span class="string">'path'</span>);</span><br><span class="line"><span class="keyword">const</span> cookieParser = <span class="built_in">require</span>(<span class="string">'cookie-parser'</span>);</span><br><span class="line"><span class="keyword">const</span> session = <span class="built_in">require</span>(<span class="string">'express-session'</span>);</span><br><span class="line"><span class="keyword">const</span> logger = <span class="built_in">require</span>(<span class="string">'morgan'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> passport = <span class="built_in">require</span>(<span class="string">'./passportConfig'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> app = express();</span><br><span class="line"></span><br><span class="line"><span class="comment">// view engine setup</span></span><br><span class="line">app.set(<span class="string">'views'</span>, path.join(__dirname, <span class="string">'views'</span>));</span><br><span class="line">app.set(<span class="string">'view engine'</span>, <span class="string">'ejs'</span>);</span><br><span class="line"></span><br><span class="line">app.use(logger(<span class="string">'dev'</span>));</span><br><span class="line">app.use(express.json());</span><br><span class="line">app.use(express.urlencoded(&#123; <span class="attr">extended</span>: <span class="literal">false</span> &#125;));</span><br><span class="line">app.use(cookieParser());</span><br><span class="line">app.use(session(&#123; <span class="attr">secret</span>: <span class="string">'your secret here'</span>, <span class="attr">resave</span>: <span class="literal">false</span>, <span class="attr">saveUninitialized</span>: <span class="literal">false</span> &#125;));</span><br><span class="line">app.use(express.static(path.join(__dirname, <span class="string">'public'</span>)));</span><br><span class="line"></span><br><span class="line"><span class="comment">// Initialize Passport and restore authentication state, if any, from the</span></span><br><span class="line"><span class="comment">// session.</span></span><br><span class="line">app.use(passport.initialize());</span><br><span class="line">app.use(passport.session());</span><br><span class="line"></span><br><span class="line">app.post(<span class="string">'/api/login'</span>,  passport.authenticate(<span class="string">'local'</span>),</span><br><span class="line">(req, res) =&gt; &#123;</span><br><span class="line">  res.json(&#123;&#125;);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">app.get(<span class="string">'/api/logout'</span>,</span><br><span class="line">  (req, res) =&gt; &#123;</span><br><span class="line">    req.logout();</span><br><span class="line">    res.json(&#123;&#125;);</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> ensureLoggedIn = <span class="function">(<span class="params">req, res, next</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (req.user) <span class="keyword">return</span> next();</span><br><span class="line">  res.status(<span class="number">401</span>).json(&#123;&#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">app.get(<span class="string">'/api/me'</span>,</span><br><span class="line">  ensureLoggedIn,</span><br><span class="line">  (req, res) =&gt; &#123;</span><br><span class="line">    res.json(req.user);</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// catch 404 and forward to error handler</span></span><br><span class="line">app.use(<span class="function"><span class="keyword">function</span>(<span class="params">req, res, next</span>) </span>&#123;</span><br><span class="line">  next(createError(<span class="number">404</span>));</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">// error handler</span></span><br><span class="line">app.use(<span class="function"><span class="keyword">function</span>(<span class="params">err, req, res, next</span>) </span>&#123;</span><br><span class="line">  <span class="comment">// set locals, only providing error in development</span></span><br><span class="line">  res.locals.message = err.message;</span><br><span class="line">  res.locals.error = req.app.get(<span class="string">'env'</span>) === <span class="string">'development'</span> ? err : &#123;&#125;;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// render the error page</span></span><br><span class="line">  res.status(err.status || <span class="number">500</span>);</span><br><span class="line">  res.render(<span class="string">'error'</span>);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = app;</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><em>passportConfig.js</em><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> passport = <span class="built_in">require</span>(<span class="string">'passport'</span>);</span><br><span class="line"><span class="keyword">const</span> LocalStrategy = <span class="built_in">require</span>(<span class="string">'passport-local'</span>).Strategy;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> users = [</span><br><span class="line">  &#123;<span class="attr">id</span>: <span class="number">1</span>, <span class="attr">email</span>: <span class="string">'user1@email.com'</span>, <span class="attr">password</span>: <span class="string">'password1'</span>&#125;,</span><br><span class="line">  &#123;<span class="attr">id</span>: <span class="number">1</span>, <span class="attr">email</span>: <span class="string">'user2@email.com'</span>, <span class="attr">password</span>: <span class="string">'password2'</span>&#125;</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> findUserByEmail = <span class="function">(<span class="params">email</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> user =  users.find(<span class="function">(<span class="params">u</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> u.email === email;</span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="keyword">return</span> user;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> findUserById = <span class="function">(<span class="params">id</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> user = users.find(<span class="function">(<span class="params">u</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> u.id === id;</span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="keyword">return</span> user;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">passport.use(<span class="keyword">new</span> LocalStrategy(</span><br><span class="line">  &#123;</span><br><span class="line">    usernameField: <span class="string">'email'</span>,</span><br><span class="line">    passwordField: <span class="string">'password'</span>,</span><br><span class="line">  &#125;,</span><br><span class="line">  (username, password, done) =&gt; &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      <span class="keyword">const</span> user = findUserByEmail(username);</span><br><span class="line">      <span class="keyword">if</span> (!user) &#123;</span><br><span class="line">        <span class="keyword">return</span> done(<span class="literal">null</span>, <span class="literal">false</span>, &#123; <span class="attr">message</span>: <span class="string">'Incorrect email or password'</span> &#125;);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span> (user.password !== password) &#123;</span><br><span class="line">        <span class="keyword">return</span> done(<span class="literal">null</span>, <span class="literal">false</span>, &#123; <span class="attr">message</span>: <span class="string">'Incorrect email or password'</span> &#125;);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> done(<span class="literal">null</span>, user);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (err) &#123;</span><br><span class="line">      <span class="keyword">return</span> done(err);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;),</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line">passport.serializeUser(<span class="function">(<span class="params">user, cb</span>) =&gt;</span> &#123;</span><br><span class="line">  cb(<span class="literal">null</span>, user.id);</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">passport.deserializeUser(<span class="keyword">async</span> (id, cb) =&gt; &#123;</span><br><span class="line">  <span class="keyword">try</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> user = findUserById(id);</span><br><span class="line">    cb(<span class="literal">null</span>, user);</span><br><span class="line">  &#125; <span class="keyword">catch</span> (err) &#123;</span><br><span class="line">    cb(err);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = passport;</span><br></pre></td></tr></table></figure></p>
+<p><br></p>
+<p><em>test.js</em><br><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> app = <span class="built_in">require</span>(<span class="string">'./app'</span>);</span><br><span class="line"><span class="keyword">const</span> request = <span class="built_in">require</span>(<span class="string">'supertest'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> agent = request.agent(app);</span><br><span class="line"></span><br><span class="line">describe(<span class="string">'API Testing'</span>, <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">  it(<span class="string">'respond with with 401 status code'</span>, (done) =&gt; &#123;</span><br><span class="line">    request(app)</span><br><span class="line">      .get(<span class="string">'/api/me'</span>)</span><br><span class="line">      .expect(<span class="number">401</span>).then(<span class="function">(<span class="params">res</span>) =&gt;</span> &#123;</span><br><span class="line">        done();</span><br><span class="line">      &#125;).catch(<span class="function"><span class="params">error</span> =&gt;</span> &#123;</span><br><span class="line">        done(error);</span><br><span class="line">      &#125;);</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  it(<span class="string">'should login user'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">done</span>) </span>&#123;</span><br><span class="line">    agent</span><br><span class="line">      .post(<span class="string">'/api/login'</span>)</span><br><span class="line">      .send(&#123; <span class="attr">email</span>: <span class="string">'user1@email.com'</span>, <span class="attr">password</span>: <span class="string">'password1'</span> &#125;)</span><br><span class="line">      .expect(<span class="number">200</span>)</span><br><span class="line">      .then(<span class="function">(<span class="params">err, res</span>) =&gt;</span> &#123;</span><br><span class="line">        done();</span><br><span class="line">      &#125;).catch(<span class="function">(<span class="params">err</span>) =&gt;</span> &#123;</span><br><span class="line">        done(err);</span><br><span class="line">      &#125;);</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  it(<span class="string">'should allow access'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">done</span>) </span>&#123;</span><br><span class="line">    agent</span><br><span class="line">      .get(<span class="string">'/api/me'</span>)</span><br><span class="line">      .expect(<span class="number">200</span>)</span><br><span class="line">      .then(<span class="function"><span class="keyword">function</span> (<span class="params">err, res</span>) </span>&#123;</span><br><span class="line">        done();</span><br><span class="line">      &#125;).catch(<span class="function">(<span class="params">err</span>) =&gt;</span> &#123;</span><br><span class="line">        done(err);</span><br><span class="line">      &#125;);</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  it(<span class="string">'should allow logout user'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">done</span>) </span>&#123;</span><br><span class="line">    agent</span><br><span class="line">      .get(<span class="string">'/api/logout'</span>)</span><br><span class="line">      .expect(<span class="number">200</span>)</span><br><span class="line">      .then(<span class="function"><span class="keyword">function</span> (<span class="params">err, res</span>) </span>&#123;</span><br><span class="line">        done();</span><br><span class="line">      &#125;).catch(<span class="function">(<span class="params">err</span>) =&gt;</span> &#123;</span><br><span class="line">        done(err);</span><br><span class="line">      &#125;);</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  it(<span class="string">'should not allow access now'</span>, <span class="function"><span class="keyword">function</span> (<span class="params">done</span>) </span>&#123;</span><br><span class="line">    agent</span><br><span class="line">      .get(<span class="string">'/api/me'</span>)</span><br><span class="line">      .expect(<span class="number">401</span>)</span><br><span class="line">      .then(<span class="function"><span class="keyword">function</span> (<span class="params">err, res</span>) </span>&#123;</span><br><span class="line">        done();</span><br><span class="line">      &#125;).catch(<span class="function">(<span class="params">err</span>) =&gt;</span> &#123;</span><br><span class="line">        done(err);</span><br><span class="line">      &#125;);</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<p>Install mocha and run test.js</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ npm install --global mocha</span><br><span class="line">$ mocha test.js</span><br></pre></td></tr></table></figure>
+<p><a href="https://github.com/aungmyohtet/supertest-authenticatedrequest-sample" target="_blank" rel="noopener">Link to complete sample repository</a></p>
+
+      
+    </div>
+
+  </div>
+
+  <div class="article-footer">
+    <div class="article-meta pull-left">
+
+    
+
+    
+
+    </div>
+
+    
+  </div>
+</article>
+
+
+    </main>
+
+    <footer class="site-footer">
+  <p class="site-info">
+    Proudly powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and
+    Theme by <a href="https://github.com/CodeDaraW/Hacker" target="_blank">Hacker</a>
+    </br>
+    
+    &copy; 2018 Aung Myo Htet
+    
+  </p>
+</footer>
+    
+  </div>
+</div>
+</body>
+</html>
